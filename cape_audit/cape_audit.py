@@ -54,6 +54,14 @@ class CapeTestObjective:
         self.report_string = "error: report string not initialised"
         self.storage_path = "error: storage path not initialised"
 
+    def get_requirement(self): 
+        return self.requirement
+
+    def get_name(self): 
+        return self.name
+
+    def get_children(self): 
+        return self.children
 
     def set_success_msg(self, msg: str):
         self._success_msg = msg
@@ -161,8 +169,9 @@ class CapeDynamicTestBase:
         
         if not os.path.exists(reportpath):
             raise FileNotFoundError(f"Test evaluation requires a report at {reportpath}")
-        
-        self.report_string = open(reportpath).read()
+
+        with open(reportpath) as f:
+            self.report_string = f.read()
         self.report = json.loads(self.report_string)
         self.test_storage_directory= test_storage_directory
         self._run_objective_verification()
@@ -201,12 +210,9 @@ class CapeDynamicTestBase:
             raise ValueError("Bad Timeout Value - Must be a valid integer")
 
     def set_enforce_timeout(self, val: bool) -> None:
-        if val:
-            self._metadata["Enforce Timeout"] = True
-        elif not val:
-            self._metadata["Enforce Timeout"] = False
-        else:
+        if not isinstance(val, bool):
             raise ValueError("Bad Enforce Timeout Value - Must be True/False")
+        self._metadata["Enforce Timeout"] = val
 
     def set_os_targets(self, targets: Union[OSTarget, List[OSTarget]]) -> None:
         if isinstance(targets, OSTarget):
@@ -220,7 +226,7 @@ class CapeDynamicTestBase:
             if task_config.get("Request Options",None) is None:
                 task_config = ""
             self._metadata["Task Config"] = task_config
-        except Exception:
+        except TypeError:
             raise Exception("Bad config - must be json serializable")
     
     def add_objective(self, objective: CapeTestObjective):

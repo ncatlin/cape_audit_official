@@ -34,7 +34,7 @@ First we create the metadata describing the test and how CAPE will execute it
 
 ```python
 from typing import Any, Dict, List, Optional, Union
-from cape_audit.cape_test import CapeDynamicTestBase, CapeTestObjective, OSTarget
+from cape_audit.cape_audit import CapeDynamicTestBase, CapeTestObjective, OSTarget
 from cape_audit.verifiers import VerifyReportSectionHasMatching, VerifyReportSectionHasContent
 
 class CapeDynamicTest(CapeDynamicTestBase):
@@ -74,7 +74,9 @@ Now we describe the test objectives. These can be linear, or nested - so if one 
         
         # It's good to have a smoke test to ensure the environment is functional before testing it.
         # Check if there are any behavioural listings at all in the report
-        o_has_behaviour_trace = CapeTestObjective(test=self, objective_name="BehaviourInfoGenerated")
+        o_has_behaviour_trace = CapeTestObjective(test=self,
+                                                  requirement="API calls are being hooked",
+                                                  objective_name="BehaviourInfoGenerated")
 
         # message for the web UI upon success
         o_has_behaviour_trace.set_success_msg("API hooking is working")
@@ -98,7 +100,9 @@ Now we describe the test objectives. These can be linear, or nested - so if one 
         #
 
         # Check if it caught the sleep API with a specific argument
-        o_sleep_hook = CapeTestObjective(test=self, objective_name="DetectSleepTime", is_informational=False)
+        o_sleep_hook = CapeTestObjective(test=self, objective_name="DetectSleepTime",
+                                         requirement="A sleep call is hooked, including its parameter",
+                                         is_informational=False)
         o_sleep_hook.set_success_msg("CAPE hooked a sleep and retrieved the correct argument")
         o_sleep_hook.set_failure_msg("There may be a hooking problem/change or the sample failed to run properly")
         # This evaluator checks if the calls list inside the process report has 

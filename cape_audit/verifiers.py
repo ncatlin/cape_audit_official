@@ -41,11 +41,15 @@ class VerifyReportSectionHasMatching:
         self.path = path  # e.g., "behavior/processes/calls"
         self.match_criteria = match_criteria
         self.is_regexes = values_are_regexes
-
         self.check_criteria_format()
 
-
     def check_criteria_format(self):
+        if self.match_criteria is None:
+            return
+
+        if not isinstance(self.match_criteria, list):
+            raise TypeError(f"match_criteria must be a list, got {type(self.match_criteria).__name__}")
+
         for criterion in self.match_criteria:
             if not isinstance(self.match_criteria, list):
                 raise TypeError(f"match_criteria must be a list, got {type(self.match_criteria).__name__}")
@@ -196,7 +200,14 @@ class VerifyFileContainsPattern:
         self.binary_mode = binary_mode
         
     def evaluate(self, report: Dict[str, Any], report_string: str, test_storage_directory: str) -> bool:
-        file_path = Path(test_storage_directory) / self.relative_path    
+        base_dir = Path(test_storage_directory).resolve()
+        file_path = (base_dir / self.relative_path).resolve()
+        
+        try:
+            file_path.relative_to(base_dir)
+        except ValueError:
+            raise ValueError("Non-relative path supplied to VerifyFileContainsPattern: "+self.relative_path)
+
         if not file_path.exists():
             return False
 
